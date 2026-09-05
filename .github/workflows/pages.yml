@@ -1,0 +1,70 @@
+name: Deploy html/ to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'html/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; never cancel a deploy that is already publishing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Only html/ is published. The Lean sources (P2M/, Theorems/, ...) are
+      # over a gigabyte, so a sparse checkout keeps this job to ~380 MB.
+      - name: Check out the site folder
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: html
+
+      # 1451 pages link out to files that live beside html/ in the repository
+      # (../../Definitions/*.lean, ../../LICENSE, ../FinalCheck.lean, ...). Once
+      # html/ is the root of the site those targets sit above it and 404, so
+      # point them at the sources on GitHub. Every .html file is either directly
+      # in html/ or one directory below it, so ../ from the former and ../../
+      # from the latter both mean the repository root.
+      # The repository's own files are untouched; only the published copy changes.
+      - name: Retarget the links that point outside html/
+        env:
+          ROOT: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/
+        run: |
+          find html -mindepth 2 -name '*.html' -print0 \
+            | xargs -0 -r sed -i "s|href=\"\\.\\./\\.\\./|href=\"$ROOT|g"
+          find html -maxdepth 1 -name '*.html' -print0 \
+            | xargs -0 -r sed -i "s|href=\"\\.\\./|href=\"$ROOT|g"
+          left=$( { find html -mindepth 2 -name '*.html' -print0 | xargs -0 -r grep -l 'href="\.\./\.\./'
+                    find html -maxdepth 1 -name '*.html' -print0 | xargs -0 -r grep -l 'href="\.\./'
+                  } | wc -l )
+          echo "pages still linking above the site root: $left"
+
+      # enablement: true turns Pages on and switches its source to GitHub Actions
+      # if that has not been done in Settings → Pages yet.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload html/ as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: html
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
