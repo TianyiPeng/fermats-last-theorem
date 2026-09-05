@@ -6,7 +6,7 @@ A complete, machine-checked proof of Fermat's Last Theorem in [Lean 4](https://l
 and the Lean theorem that carries it, and the `html/` folder presents the whole proof as web pages you can browse
 offline (see "Reading the proof in a browser" below).
 
-Research artifact. Not maintained and not accepting contributions.
+Research artifact. Not maintained and not accepting contributions. 
 
 ## The statement
 
