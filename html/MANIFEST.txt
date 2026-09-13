@@ -1,4 +1,0 @@
-Reader's documentation for the Lean 4 proof of Fermat's Last Theorem.
-Documents the Lean sources in this repository (Lean v4.33.1, Mathlib v4.33.0). Generated 2026-09-03.
-Open index.html in a browser. Place this folder at the repository root for the .lean source links to resolve.
-29511 theorem records, 1450 definition pages.

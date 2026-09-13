@@ -1,4 +1,0 @@
-Third-party files in this folder
-
-graphviz.umd.js - @hpcc-js/wasm 2.35.0 (Graphviz compiled to WebAssembly), Apache License 2.0, see graphviz.LICENSE.txt; includes Graphviz (Eclipse Public License 1.0 / Common Public License) as compiled code.
-katex/ - KaTeX 0.18.4 (katex.min.js, and katex-embedded.css = katex.min.css with the fonts inlined), MIT License, see katex/LICENSE; the bundled fonts are under the SIL Open Font License 1.1, copyright Design Science, Inc. and Khan Academy, see katex/FONTS-LICENSE.txt.
