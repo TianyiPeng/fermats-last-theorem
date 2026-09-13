@@ -78,13 +78,13 @@ status:
       file: "Theorems/Thm_fermat_last_theorem.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "verification/comparator/config.json"
+      comparator_config: "comparator.json"
       literature_dependencies: []
     - declaration: "flt_mathlib"
       file: "FinalCheck.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "verification/comparator/config.json"
+      comparator_config: "comparator.json"
       literature_dependencies: []
 
 automation:
@@ -110,7 +110,7 @@ review:
     The proof is machine-checked: by the Lean kernel in a from-scratch build whose
     default target fails unless fermat_last_theorem depends on exactly propext,
     Classical.choice and Quot.sound; by leanprover/comparator against the
-    Mathlib-only challenge statement in verification/comparator/Challenge.lean
+    Mathlib-only challenge statement in Challenge.lean
     (statement and constants identical, no other axiom, full kernel replay
     including Mathlib); and by the independent kernel nanoda, which accepted every
     declaration of the exported environment. See README.md, "How it was verified".

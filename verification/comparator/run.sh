@@ -2,8 +2,8 @@
 # Re-run the comparator check (https://github.com/leanprover/comparator) on this tree. Linux (bash, git, python3, GNU coreutils).
 # Prerequisite: the tree is fully built ('lake build' at the repository root, Mathlib included; the wrapper reuses those .olean files).
 # What it does: fetches comparator and lean4export at the pinned tags, pins both to this repository's lean-toolchain, builds them from otherwise
-# unchanged source, creates a wrapper Lake project holding Challenge.lean / Solution.lean whose build directory is a symlink farm of the tree's
-# compiled products, and runs 'lake env comparator config.json' there. Exit code = comparator's; its standard output goes to
+# unchanged source, creates a wrapper Lake project holding the repository root's Challenge.lean / Solution.lean whose build directory is a symlink farm of the tree's
+# compiled products, and runs 'lake env comparator comparator.json' there. Exit code = comparator's; its standard output goes to
 # $WORK/wrapper/comparator.log, whose last line is 'Your solution is okay!' on success.
 # Resources: about 15 h of wall time, nearly all of it the kernel replay on one core (about 13 h); peak resident memory about 230 GB during
 # the replay (allow 300 GB).
@@ -49,12 +49,17 @@ if [ -n "${LANDRUN:-}" ]; then ln -sfn "$LANDRUN" "$WORK/bin/landrun"
 elif command -v landrun >/dev/null 2>&1; then ln -sfn "$(command -v landrun)" "$WORK/bin/landrun"
 else chmod +x "$CMP/scripts/fake-landrun.sh"; ln -sfn "$CMP/scripts/fake-landrun.sh" "$WORK/bin/landrun"
      log "WARNING: no landrun found - using comparator's scripts/fake-landrun.sh (NO sandbox around the solution's build)"; fi
-# 4. wrapper project: the four input files + a symlink farm of every compiled library root of the tree
+# 4. wrapper project: the four input files + a symlink farm of every compiled library root of the tree.
+# Challenge.lean, Solution.lean and comparator.json are the repository-root copies (the Palomar layout);
+# only the wrapper's own lakefile.toml comes from this directory.
 W=$WORK/wrapper; mkdir -p "$W/.lake/build/lib/lean"
-cp "$HERE/Challenge.lean" "$HERE/Solution.lean" "$HERE/lakefile.toml" "$HERE/config.json" "$W/"; echo "$TOOLCHAIN" > "$W/lean-toolchain"
+cp "$ROOT/Challenge.lean" "$ROOT/Solution.lean" "$HERE/lakefile.toml" "$ROOT/comparator.json" "$W/"; echo "$TOOLCHAIN" > "$W/lean-toolchain"
 [ -e "$ROOT/.lake/build/lib/lean/Theorems" ] || { log "ERROR: $ROOT/.lake/build/lib/lean/Theorems missing - run 'lake build' at the repository root first"; exit 2; }
 for r in "$ROOT/.lake/build/lib/lean" "$ROOT"/.lake/packages/*/.lake/build/lib/lean; do
   for e in "$r"/*; do b=$W/.lake/build/lib/lean/$(basename "$e")
+    # The root project now builds Challenge and Solution too; do not farm those in, or the wrapper
+    # would adopt the root's .olean instead of elaborating its own copy under comparator.
+    case $(basename "$e") in Challenge|Challenge.olean|Challenge.*|Solution|Solution.olean|Solution.*) continue;; esac
     if [ -L "$b" ] && [ "$(readlink "$b")" = "$e" ]; then continue; fi
     ln -sn "$e" "$b" 2>/dev/null || log "WARNING: name collision in the symlink farm: $e (kept $(readlink "$b"))"; done; done
 [ -e "$W/.lake/build/lib/lean/Mathlib.olean" ] || { log "ERROR: Mathlib.olean not found under $ROOT/.lake/packages - is the tree built?"; exit 2; }
@@ -65,10 +70,10 @@ export PATH=$WORK/bin:$PATH LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-4} MIMALLOC_GEN
   echo "lean: $(lean --version 2>&1)"
   echo "comparator $(git -C "$CMP" rev-parse HEAD 2>/dev/null || echo '?') bin=$(sha256sum "$CMPBIN" | cut -c1-16); lean4export $(git -C "$EXP" rev-parse HEAD 2>/dev/null || echo '?') bin=$(sha256sum "$EXPBIN" | cut -c1-16); landrun -> $(readlink -f "$WORK/bin/landrun")"
   echo "tree $(git -C "$ROOT" rev-parse HEAD 2>/dev/null || echo '?') dirty=$(git -C "$ROOT" status --porcelain 2>/dev/null | grep -vc '^?? ' || true)"
-  echo "inputs:"; sha256sum Challenge.lean Solution.lean lakefile.toml config.json lean-toolchain; } > run.status
+  echo "inputs:"; sha256sum Challenge.lean Solution.lean lakefile.toml comparator.json lean-toolchain; } > run.status
 log "running comparator in $W (log: $W/comparator.log)"
 set +e
-( ulimit -v $((VMEM_GB*1024*1024)); stdbuf -oL -eL lake env "$CMPBIN" config.json 2> comparator.err | tee comparator.log; exit "${PIPESTATUS[0]}" )
+( ulimit -v $((VMEM_GB*1024*1024)); stdbuf -oL -eL lake env "$CMPBIN" comparator.json 2> comparator.err | tee comparator.log; exit "${PIPESTATUS[0]}" )
 rc=$?
 set -e
 echo "END $(date -u +%FT%TZ) rc=$rc" >> run.status

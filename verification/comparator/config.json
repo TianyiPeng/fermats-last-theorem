@@ -1,3 +1,0 @@
-{"challenge_module": "Challenge", "solution_module": "Solution",
- "theorem_names": ["FLT_for_comparator", "FLT_mathlib_for_comparator"],
- "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"], "enable_nanoda": false}

@@ -23,3 +23,14 @@ lean_lib Theorems where
 @[default_target]
 lean_lib FinalCheck where
   roots := #[`FinalCheck]
+
+-- Comparator challenge/solution layer, the surface the Palomar registry checks
+-- (README.md, "How it was verified"). Trusted: Challenge, which imports only Mathlib and
+-- states the theorem with `sorry`. Untrusted: Solution, which imports Theorems and proves it.
+@[default_target]
+lean_lib Challenge where
+  roots := #[`Challenge]
+
+@[default_target]
+lean_lib Solution where
+  roots := #[`Solution]

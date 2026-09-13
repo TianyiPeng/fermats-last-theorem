@@ -33,7 +33,7 @@ no `native_decide`). `FinalCheck.lean` also derives Mathlib's own statement, `Fe
   Mathlib compiled from source. All 60,475 modules of this repository built, every declaration was checked by the
   Lean kernel, and the axioms are as above.
 - **comparator.** [leanprover/comparator](https://github.com/leanprover/comparator) `v4.33.0` checked the build against
-  `verification/comparator/Challenge.lean`, which states the theorem using only Mathlib. It confirmed that the proved
+  `Challenge.lean`, which states the theorem using only Mathlib. It confirmed that the proved
   statement and every constant it mentions are identical to the challenge, that no other axiom is used, and that the
   whole proof, Mathlib included, replays through the Lean kernel. Verdict: `Your solution is okay!`
 - **A second kernel.** [nanoda](https://github.com/ammkrn/nanoda_lib) 0.4.13, an independent Lean kernel written in
@@ -42,8 +42,9 @@ no `native_decide`). `FinalCheck.lean` also derives Mathlib's own statement, `Fe
   three speed up its definitional-equality search, without which a few declarations of this proof occupy unmodified
   nanoda for many hours each. None of the patches adds, removes or weakens a typing rule.
 
-No module contains `axiom`, `sorry`, `native_decide`, `unsafe`, `extern`, `implemented_by`, `partial def` or `#eval`
-(`Challenge.lean` uses `sorry` by design and is not part of the package).
+No module contains `axiom`, `sorry`, `native_decide`, `unsafe`, `extern`, `implemented_by`, `partial def` or `#eval`,
+apart from `Challenge.lean`: it is the trusted statement surface, so its two theorems are stated and left `sorry` by
+design, and `Solution.lean` proves them from `Theorems/`.
 
 Together, these checks establish that the statement above follows from the three axioms, given trust in the Lean
 kernel (or nanoda) and the checking tools. The statement is written with Lean's built-in natural numbers, `+`, `≤`, `<`
@@ -52,6 +53,16 @@ comparator checks that every definition the statement mentions is identical to s
 Mathlib has to be trusted, because the kernel checks everything beneath the statement. What no tool can check is that
 each intermediate theorem means what its name suggests; that is for the reader to judge, and `PROOF-PATH.md` names
 the Lean theorem behind each step and states exactly how strong each named classical result is as proved here.
+
+## Registry layout
+
+The repository root carries the [Palomar](https://palomar-registry.org) submission layout, so the registry's
+acceptance check can run against this snapshot as it stands: `Challenge.lean` states the two theorems with `sorry` and
+imports only Mathlib, `Solution.lean` proves them from `Theorems/Thm_fermat_last_theorem.lean`, `comparator.json` names
+that pair and the three permitted axioms, `formalization.yaml` carries the metadata, `lean-toolchain` and
+`lake-manifest.json` pin Lean and Mathlib, and `LICENSE` is the root licence. `FinalCheck`, `Challenge` and `Solution`
+are all default `lake build` targets. `verification/comparator/run.sh` runs the same comparison locally from these
+same files.
 
 ## Reading the proof in a browser
 
@@ -92,8 +103,9 @@ script fetches and builds its checker at a pinned version and exits 0 on success
 
 ## About the sources
 
-`FinalCheck.lean` is the default target; `Theorems/` holds the statements, `P2M/Sol/` the proofs (each importing the
-statements it cites), `Definitions/` the definitions, `verification/` the two checks and `tools/docs-site/` the
+`FinalCheck.lean` is a default target; `Theorems/` holds the statements, `P2M/Sol/` the proofs (each importing the
+statements it cites), `Definitions/` the definitions, `Challenge.lean`, `Solution.lean` and `comparator.json` the
+statement surface described under "Registry layout", `verification/` the two checks and `tools/docs-site/` the
 program that generated the web pages described above. The Lean sources were produced by AI agents building
 on human-written open-source Lean, with Lean as the arbiter, and are written to be checked rather than read: names are
 machine-generated, labels such as `P2M` or hexadecimal suffixes are pipeline labels rather than mathematics, and where
