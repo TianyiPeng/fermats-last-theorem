@@ -21,7 +21,6 @@ project:
   license: "Apache-2.0"
   responsible_maintainers:
     - "Anthropic"
-    - "Tianyi Peng"
 
 sources:
   - title: "Modular elliptic curves and Fermat's Last Theorem"
