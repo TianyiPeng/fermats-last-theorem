@@ -10,7 +10,7 @@ project:
     A complete, machine-checked Lean 4 proof of Fermat's Last Theorem, built on
     Mathlib: for every natural number n >= 3 there are no positive natural
     numbers a, b, c with a^n + b^n = c^n (declaration fermat_last_theorem).
-    The default build target also derives Mathlib's own statement
+    The FinalCheck build target also derives Mathlib's own statement
     FermatLastTheorem. The argument is that of Frey, Serre, Ribet, Wiles and
     Taylor-Wiles; the named classical inputs (irreducibility of the Frey
     representation, Langlands-Tunnell, modularity lifting, modularity of
@@ -19,6 +19,9 @@ project:
   authors:
     - "Anthropic"
   license: "Apache-2.0"
+  responsible_maintainers:
+    - "Anthropic"
+    - "Tianyi Peng"
 
 sources:
   - title: "Modular elliptic curves and Fermat's Last Theorem"
